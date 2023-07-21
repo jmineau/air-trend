@@ -1,30 +1,59 @@
-[
-  {
-    "name": "2b_205",
-    "baudrate": 4800,
-    "delimiter": ",",
-    "port": "/dev/serial/by-id/usb-UTEK_USB__-__Serial_Cable_FT2QWEFA-if02-port0",
-    "variables": [
-      { "name": "o3_ppb", "save": true },
-      { "name": "t_c", "save": true },
-      { "name": "p_hpa", "save": true },
-      { "name": "flow_ccpm", "save": true },
-      { "name": "inst_date", "save": false },
-      { "name": "inst_time", "save": false }
-    ]
-  },
-  {
-    "name": "metone_es642",
-    "baudrate": 9600,
-    "port": "/dev/serial/by-id/usb-UTEK_USB__-__Serial_Cable_FT0EG25Q-if01-port0",
-    "variables": [
-      { "name": "pm25_mgm3", "save": true },
-      { "name": "flow_lpm", "save": true },
-      { "name": "t_c", "save": true },
-      { "name": "rh_pct", "save": true },
-      { "name": "pres_hpa", "save": true },
-      { "name": "status", "save": true },
-      { "name": "checksum", "save": true }
-    ]
-  }
-]
+{
+  "trx01": [
+    {
+      "class": "GPS",
+      "port": "usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0",
+      "is_active": false
+    },
+    {
+      "class": "LGR",
+      "port": "usb-FTDI_FT232R_USB_UART_AK070IGS-if00-port0",
+      "valve_pin": 16
+    }
+  ],
+  "trx02": [
+    {
+      "class": "GPS",
+      "port": null
+    },
+    {
+      "class": "Teledyne_T500u",
+      "port": null
+    }
+  ],
+  "ldf": [
+    {
+      "class": "LGR",
+      "port": "usb-Prolific_Technology_Inc._USB-Serial_Controller_CREAb119D15-if00-port0",
+      "MIU": true
+    }
+  ],
+  "wbb": [
+    {
+      "class": "Magee_AE33",
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT2QW3XX-if01-port0",
+      "is_active": false
+    },
+    {
+      "class": "MetOne_ES642",
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT0EG25Q-if01-port0"
+    },
+    {
+      "class": "Teledyne_T200",
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT0EG25Q-if03-port0"
+    },
+    {
+      "class": "Teledyne_T300",
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT0EG25Q-if02-port0"
+    },
+    {
+      "class": "Teledyne_T400",
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT0EG25Q-if00-port0"
+    },
+    {
+      "class": "Teledyne_T500u",
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT2QW3XX-if00-port0",
+      "is_active": false
+    }
+  ]
+}
