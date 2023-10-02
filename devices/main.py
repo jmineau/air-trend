@@ -97,7 +97,7 @@ def writer(q: Queue):
 
 
 def main():
-    site = os.environ.get('SITE')
+    site = os.environ.get('HOSTNAME')
     devices = DEVICES[site]
 
     q = Queue()

@@ -46,7 +46,7 @@ sudo pip3 install docker-compose
 Once the dependencies are installed, restart the system. The next step is to clone this repository.
 
 ```bash
-git clone --depth=1 https://github.com/benfasoli/air-trend /home/pi/air-trend
+git clone --depth=1 https://github.com/jmineau/air-trend /home/pi/air-trend
 ```
 
 > This clones the repository to `/home/pi/air-trend` but any path will do.
@@ -57,7 +57,7 @@ The `docker-compose.yml` file defines the path used for storing logged data (def
 
 If you cloned the repository to a location other than `/home/pi/air-trend` or wish to store logged data in a location other than `/home/pi/data`, you'll need to update the volume mount source for the `/home/pi/air-trend/config.json` file and the `/home/pi/data` directory.
 
-Devices are declared using `config.json` using keys that map to arguments passed to [SerialDevice](./devices/main.py). For example configuration blocks, refer to [`examples/`](./examples/).
+Devices are declared using `config.json` using keys that map to arguments passed to [SerialDevice](./devices/main.py). This air-trend program utilizes one config file shared between multiple sites. You must correctly configure the `hostname` of the linux computer to match the top-level keys of the config file.
 
 > You can use [`systemd`](https://systemd.io) to manage daemons if you're more comfortable with `systemd` than docker. `systemd` configuration is out of scope for this documentation but you can reference [`devices/Dockerfile`](devices/Dockerfile) for dependency installation steps and [`docker-compose.yml`](docker-compose.yml) for setting required environment variables.
 
