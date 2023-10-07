@@ -1,18 +1,12 @@
-#!/usr/bin/python
-# Watches status.py file and changes GPIO settings for
-# solenoid valves and calibration systems.
-# Code originally by Ben Fasoli, written in Python 2
-# Updated by James Mineau, 2022-09-29, converted to Python 3 & added comments
-# Renamed from controlValves to flow, imports valve.py - JM 2022-10-31
-# Switched from using real time to control valves to specifying durations - JM 2023-07-13
-# ----------------------------------------------------------------------------
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+import logging
 from multiprocessing import Process
 import RPi.GPIO as GPIO
 import time
 
 from valve import Valve
-from logger import Logger
 
 ID_PATH = '/home/pi/.valve.id'
 
@@ -21,35 +15,79 @@ IDs = {
     'reference': 2
 }
 
-logger = Logger('flow').logger
 
+import time
 
 def wait(h=0, m=0, s=1):
+    """
+    Wait for a specified amount of time.
+
+    Args:
+        h (int): Hours to wait (default is 0).
+        m (int): Minutes to wait (default is 0).
+        s (int): Seconds to wait (default is 1).
+    """
     seconds = (h * 60 * 60) + (m * 60) + s
     time.sleep(seconds)
 
 
 class FlowControlSystem:
+    """
+    A class representing a flow control system that switches between atmosphere and reference gas.
+
+    Attributes:
+    - valve_pin (int): The raspberry GPIO board pin number for the valve control system.
+    - valve (Valve): The valve control system.
+    - ID (int): The ID of the current state of the flow control system.
+    """
+
     def __init__(self, valve_pin):
         # Initialize Valve Control System
         self.valve = Valve(pin=valve_pin)
         self.ID = None
 
-        self.process = Process(target=self.flow)
-        self.process.daemon = True
+        self._process = Process(target=self.flow)
+        self._process.daemon = True
+        
+        self.logger = logging.getLogger(__name__)
 
     def update(self, source, ID):
+        """
+        Updates the valve control system with the given source and sets the flow ID.
+
+        Args:
+        - source (str): The source of the gas.
+        - ID (int): The ID of the flow control system.
+        """
         self.valve.update(source)
         self.ID = ID
 
     def flush(self, source, h=0, m=0, s=90):
+        """
+        Flushes the valve control system for a given time.
+
+        Args:
+        - source (str): The source of the gas.
+        - h (int): The hours to flush the valve control system (default 0).
+        - m (int): The minutes to flush the valve control system (default 0).
+        - s (int): The seconds to flush the valve control system (default 90).
+        """
         ID = -1 * IDs[source]  # Get ID
 
-        logger.info(f'Flushing - Setting ID: {ID}')
+        self.logger.debug(f'Flushing - Setting ID: {ID}')
         self.update(source, ID)
         wait(h, m, s)
 
     def measure(self, source, h=0, m=0, s=0):
+        """
+        Measures the gas for a given source and time.
+
+        Args:
+        - source (str): The source of the gas.
+        - h (int): The hours to measure (default 0).
+        - m (int): The minutes to measure (default 0).
+        - s (int): The seconds to measure (default 0).
+        """
         if (h + m + s) == 0:
             raise ValueError('Measurement time cannot be 0!')
 
@@ -58,11 +96,16 @@ class FlowControlSystem:
 
         ID = IDs[source]  # Get ID
 
-        logger.info(f'Measuring {source.capitalize()} - Setting ID: {ID}')
+        self.logger.debug(f'Measuring {source.capitalize()} - Setting ID: {ID}')
         self.update(source, ID)
         wait(h, m, s)
 
     def flow(self):
+        """
+        Starts the flow control system and measures atmospheric and reference tank gas.
+        """
+        self.logger.info('Starting flow control system...')
+        
         try:
             while True:
                 # Measure atmosphere for 1 hour
@@ -76,13 +119,19 @@ class FlowControlSystem:
             raise
 
     def start(self):
-        self.process.start()
+        """
+        Starts the flow control system process.
+        """
+        self._process.start()
 
     def cleanup(self):
-        logger.info('Cleaning up...')
+        """
+        Cleans up the flow control system by updating the valve to atmosphere and cleaning up the GPIO pins.
+        """
+        self.logger.debug('Cleaning up...')
         self.valve.update('atmosphere')  # End with atmospheric valve
         GPIO.cleanup()  # cleanup pi pins
 
 
 if __name__ == '__main__':
-    FlowControlSystem().initialize()
+    FlowControlSystem().start()

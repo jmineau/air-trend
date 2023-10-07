@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct 31 18:51:07 2022
-
-@author: James Mineau
-
 valve.py switches the solenoid valve between the reference tank and atmosphere.
 Usage:
     python valve.py atm
@@ -12,24 +8,38 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 
 import RPi.GPIO as GPIO
 
-from logger import Logger
 
 VALVEPIN = int(os.getenv('VALVEPIN', 16))  # default pi pin that controls valve
 
-logger = Logger('flow').logger
 
+import logging
+import RPi.GPIO as GPIO
 
 class Valve:
+    """
+    A class representing a valve that controls the flow of gas in a gas sensor system.
+
+    Attributes:
+    - source (str): The source of the gas flow, either 'atm' for atmosphere or 'ref' for reference.
+    - pin (int): The pin number on the Raspberry Pi GPIO board that controls the valve.
+
+    """
+
     def __init__(self, source='atm', pin=VALVEPIN):
+
         self.source = source  # valve source
         self.pin = int(pin)  # pi pin that controls valves
+        
+        # Log valve under flow logger
+        self.logger = logging.getLogger('flow')
 
         # Setup R-Pi board
-        logger.info('Activating valve control system...')
+        self.logger.info('Activating valve control system...')
         GPIO.setmode(GPIO.BOARD)  # Set GPIO to use BOARD mode
 
         # Set GPIO to be a transmitting signal with inital state
@@ -37,18 +47,30 @@ class Valve:
 
     @property
     def pin_state(self):
+        """
+        Returns the pin state based on the current source.
+
+        Returns:
+        - int: The pin state, either 0 for reference or 1 for atmosphere.
+        """
         # 0 if reference (ref)
         # 1 if atmosphere (atm)
         if str(self.source) in ['atm', 'atmosphere', '1']:
-            logger.info('Setting valve to atmosphere!')
+            self.logger.debug('Setting valve to atmosphere!')
             return 1
         elif str(self.source) in ['ref', 'reference', '0']:
-            logger.info('Setting valve to reference!')
+            self.logger.debug('Setting valve to reference!')
             return 0
         else:
             raise ValueError('Invalid source!')
 
     def update(self, source):
+        """
+        Updates the source of the gas flow and sets the pin state accordingly.
+
+        Args:
+        - source (str): The new source of the gas flow, either 'atm' for atmosphere or 'ref' for reference.
+        """
         self.source = source
         GPIO.output(self.pin, self.pin_state)
 
