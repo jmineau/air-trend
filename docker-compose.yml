@@ -3,7 +3,7 @@ services:
   devices:
     build: ./devices/
     environment:
-      - HOSTNAME
+      - SITE
       - CONFIG=/src/config.json
       - DATAPATH=/data
       - LOGLEVEL=INFO

@@ -6,29 +6,29 @@
       "is_active": false
     },
     {
-      "class": "LGR",
+      "class": "LGR_UGGA",
       "port": "usb-FTDI_FT232R_USB_UART_AK070IGS-if00-port0",
-      "valve_pin": 16
+      "flow_controller": 16
     }
   ],
   "trx02": [
     {
       "class": "GPS",
-      "port": null
+      "port": "usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0"
     },
     {
       "class": "Teledyne_T500u",
-      "port": null
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT2QWGI6-if01-port0"
     }
   ],
   "ldf": [
     {
-      "class": "LGR",
+      "class": "LGR_UGGA",
       "port": "usb-Prolific_Technology_Inc._USB-Serial_Controller_CREAb119D15-if00-port0",
-      "MIU": true
+      "flow_controller": "MIU"
     }
   ],
-  "wbb": [
+  "uataq-brain": [
     {
       "class": "Magee_AE33",
       "port": "usb-UTEK_USB__-__Serial_Cable_FT2QW3XX-if01-port0",
@@ -36,7 +36,8 @@
     },
     {
       "class": "MetOne_ES642",
-      "port": "usb-UTEK_USB__-__Serial_Cable_FT0EG25Q-if01-port0"
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT0EG25Q-if01-port0",
+      "is_active": false
     },
     {
       "class": "Teledyne_T200",

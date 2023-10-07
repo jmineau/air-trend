@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 13 23:55:32 2023
-
-@author: James Mineau (James.Mineau@utah.edu)
-"""
 
 import csv
 import logging
@@ -14,6 +9,7 @@ import os
 import time
 
 import devices
+from flow import FlowControlSystem
 
 CONFIG = os.getenv("CONFIG", "config.json")
 LOGLEVEL = os.getenv("LOGLEVEL", "INFO")
@@ -79,8 +75,8 @@ def writer(q: Queue):
             record = data.record
 
             # Format time
-            time = record['timestamp']
-            record['timestamp'] = time.isoformat()
+            time = record['time']
+            record['time'] = time.isoformat()
 
             path = time.strftime(path_template)
             should_write_header = not os.path.exists(path)
@@ -97,12 +93,27 @@ def writer(q: Queue):
 
 
 def main():
-    site = os.environ.get('HOSTNAME')
+    site = os.environ.get('SITE')
     devices = DEVICES[site]
 
     q = Queue()
 
     for device_config in devices:
+        
+        # Initialize flow controller if necessary
+        flow_controller = device_config.get('flow_controller', False)
+        if flow_controller:
+            if isinstance(flow_controller, int):
+                # Initialize flow controller using GPIO board pin
+                flow_controller = FlowControlSystem(valve_pin=flow_controller)
+                flow_controller.start()
+                time.sleep(10)  # Wait for flow controller to initialize
+                
+                # Pass flow controller to device through config
+                device_config['flow_controller'] = flow_controller
+            elif flow_controller != 'MIU':
+                raise ValueError('Invalid flow controller!')
+        
         p = Process(target=worker, kwargs={"q": q,
                                            "device_config": device_config})
         p.daemon = True
