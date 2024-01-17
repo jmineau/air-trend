@@ -826,10 +826,10 @@ class Teledyne_T500u(SerialDevice):
                          poll_interval=Teledyne_T500u.poll_interval,
                          poll_type=Teledyne_T500u.poll_type,
                          variable_filter=Teledyne_T500u.variable_filter)
-        
+
         # Set last led enable time to 1 day ago to force check on startup
         self._last_led_enable = dt.utcnow() - timedelta(days=1)
-        
+
     def warning_present(self, warning):
         '''Checks for warning in T500u response
 
@@ -841,9 +841,9 @@ class Teledyne_T500u(SerialDevice):
         response = b''
         while self.connection.in_waiting:
             response = response + self.connection.read()
-    
+
         return warning.encode('utf-8') in response
-    
+
     def enable_bench_led(self):
         commands = [
             '/k 7',  # SETUP
@@ -863,51 +863,47 @@ class Teledyne_T500u(SerialDevice):
             'w clear WBENCHLED',  # clear warning
             '\r\n'  # cariage return
             ]
-        
+
         while self.warning_present('BENCH LED DISABLED'):
             # Send commands to the T500u to enable NO2 LED
             self.logger.info('NO2 Bench LED disabled, enabling...')
             cmd = '\r\n'.join(commands).encode('utf-8')
             self.connection.write(cmd)
             time.sleep(self.poll_interval)
-        
+
         self._last_led_enable = dt.utcnow()  # update enable time
-        
-            
+
+
     def get_data(self) -> Iterator[Data]:
         while True:
             timestamp = dt.utcnow()
-            
+
             # Check that bench led is enabled once per day
             if (timestamp - self._last_led_enable).days > 0:
                 self.enable_bench_led()
-                
-            yield from super().get_data()  # TODO test this
-            #   might not work beacause of two while loops
-            
-            #     timestamp = dt.utcnow()  # update timestamp
-                
-            # self.connection.write(self.poll_command)
-            # time.sleep(self.poll_interval)
+                timestamp = dt.utcnow()  # update timestamp
 
-            # response = b''
-            # while self.connection.in_waiting:
-            #     response = response + self.connection.read()
+            self.connection.write(self.poll_command)
+            time.sleep(self.poll_interval)
 
-            # try:
-            #     response = response.decode('utf-8')
-            # except UnicodeDecodeError:
-            #     continue
+            response = b''
+            while self.connection.in_waiting:
+                response = response + self.connection.read()
 
-            # for handler in self.handlers:
-            #     record = handler.format_response(response, self.logger)
-                
-            #     if record is None:
-            #         continue
-                
-            #     data = Data(handler.path_template, {'time': timestamp,
-            #                                         **record})
-            #     yield data
+            try:
+                response = response.decode('utf-8')
+            except UnicodeDecodeError:
+                continue
+
+            for handler in self.handlers:
+                record = handler.format_response(response, self.logger)
+
+                if record is None:
+                    continue
+
+                data = Data(handler.path_template, {'time': timestamp,
+                                                    **record})
+                yield data
 
 
 # class TSI_VWCPC(SerialDevice):
