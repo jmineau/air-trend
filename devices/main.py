@@ -99,7 +99,7 @@ def main():
     q = Queue()
 
     for device_config in devices:
-        
+
         # Initialize flow controller if necessary
         flow_controller = device_config.get('flow_controller', False)
         if flow_controller:
@@ -108,12 +108,12 @@ def main():
                 flow_controller = FlowControlSystem(valve_pin=flow_controller)
                 flow_controller.start()
                 time.sleep(10)  # Wait for flow controller to initialize
-                
+
                 # Pass flow controller to device through config
                 device_config['flow_controller'] = flow_controller
             elif flow_controller != 'MIU':
                 raise ValueError('Invalid flow controller!')
-        
+
         p = Process(target=worker, kwargs={"q": q,
                                            "device_config": device_config})
         p.daemon = True

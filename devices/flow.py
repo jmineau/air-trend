@@ -44,41 +44,38 @@ class FlowControlSystem:
     def __init__(self, valve_pin):
         # Initialize Valve Control System
         self.valve = Valve(pin=valve_pin)
-        self.ID = None
+        self.status = None
 
         self._process = Process(target=self.flow)
         self._process.daemon = True
         
         self.logger = logging.getLogger(__name__)
 
-    def update(self, source, ID):
+    def update(self, source):
         """
-        Updates the valve control system with the given source and sets the flow ID.
+        Updates the valve control system with the given source.
 
         Args:
         - source (str): The source of the gas.
-        - ID (int): The ID of the flow control system.
         """
         self.valve.update(source)
-        self.ID = ID
+        self.status = source
 
-    def flush(self, source, h=0, m=0, s=90):
+    def flush(self, h=0, m=0, s=90):
         """
         Flushes the valve control system for a given time.
 
         Args:
-        - source (str): The source of the gas.
         - h (int): The hours to flush the valve control system (default 0).
         - m (int): The minutes to flush the valve control system (default 0).
         - s (int): The seconds to flush the valve control system (default 90).
         """
-        ID = -1 * IDs[source]  # Get ID
 
-        self.logger.debug(f'Flushing - Setting ID: {ID}')
-        self.update(source, ID)
+        self.logger.debug(f'Flushing')
+        self.status = 'flush'
         wait(h, m, s)
 
-    def measure(self, source, h=0, m=0, s=0):
+    def measure(self, source, h=0, m=0, s=0, flush=90):
         """
         Measures the gas for a given source and time.
 
@@ -87,17 +84,16 @@ class FlowControlSystem:
         - h (int): The hours to measure (default 0).
         - m (int): The minutes to measure (default 0).
         - s (int): The seconds to measure (default 0).
+        - flush (int): The seconds to flush before measuring (default 90).
         """
         if (h + m + s) == 0:
             raise ValueError('Measurement time cannot be 0!')
 
         # Flush for 90 seconds before measuring
-        self.flush(source)
+        self.flush(s=flush)
 
-        ID = IDs[source]  # Get ID
-
-        self.logger.debug(f'Measuring {source.capitalize()} - Setting ID: {ID}')
-        self.update(source, ID)
+        self.logger.debug(f'Measuring {source.capitalize()}')
+        self.update(source)
         wait(h, m, s)
 
     def flow(self):
@@ -129,7 +125,7 @@ class FlowControlSystem:
         Cleans up the flow control system by updating the valve to atmosphere and cleaning up the GPIO pins.
         """
         self.logger.debug('Cleaning up...')
-        self.valve.update('atmosphere')  # End with atmospheric valve
+        self.update('atmosphere')  # End with atmospheric valve
         GPIO.cleanup()  # cleanup pi pins
 
 

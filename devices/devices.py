@@ -12,6 +12,8 @@ from typing import Iterator, List
 
 import serial
 
+from flow import FlowControlSystem
+
 # TODO :
     # ADI_MAGIC
     # TSI_VWCPC
@@ -120,21 +122,24 @@ class ResponseHandler:
         Raises:
             ValueError: If the response string does not match the device's response pattern.
         """
-        
+
         # response: str
         # row: List[str]
         # record: Dict[str, str]
-        
+
         logger.debug(f'Formatting response: {response}')
 
+        # Check if response matches line filter
         if not self.match_line(response):
             return None
 
         row = response.split(self.delimiter)
 
+        # Remove leading and trailing whitespace
         for i, variable in enumerate(row):
             row[i] = variable.strip()
 
+        # Check if response variables matches variable filter
         if self.variable_filter:
             filtered_row = []
             for value in row:
@@ -144,6 +149,7 @@ class ResponseHandler:
         else:
             filtered_row = row
 
+        # Remove non-printable characters
         response = self.delimiter.join(filtered_row)
         response = ''.join([s for s in response if s in string.printable])
 
@@ -151,12 +157,14 @@ class ResponseHandler:
 
         row = re.split(self.delimiter, response)
 
+        # Check if number of variables matches config
         n_var = len(row)
         if not n_var == self.n_variables:
             logger.debug(f'Found {n_var} records '
                          f'but config specifies {self.n_variables}.')
             return None
 
+        # Drop variables that are not marked as "save"
         record = {self.variables[i]['name']: row[i]
                   for i in range(n_var)
                   if self.variables[i]['save']}
@@ -459,32 +467,23 @@ class LGR_UGGA(SerialDevice):
     name = 'lgr_ugga'
 
     baudrate = 115200
-    line_filter = '/'  # match with forward slash in time_LGR
+    line_filter = '/'  # match with forward slash in inst_time
 
-    variables = ['time_lgr', 'CH4_ppm',   'CH4_ppm_sd',  'H2O_ppm',
+    variables = ['inst_time', 'CH4_ppm',   'CH4_ppm_sd',  'H2O_ppm',
                  'H2O_ppm_sd',    'CO2_ppm',   'CO2_ppm_sd',  'CH4d_ppm',
                  'CH4d_ppm_sd',   'CO2d_ppm',  'CO2d_ppm_sd', 'GasP_torr',
                  'GasP_torr_sd',  'GasT_C',    'GasT_C_sd',   'AmbT_C',
                  'AmbT_C_sd',     'RD0_us',    'RD0_us_sd',   'RD1_us',
                  'RD1_us_sd',     'Fit_Flag',  'MIU_Valve',   'MIU_Desc']
     variables = [{'name': name, 'save': True} for name in variables]
-
-    path_template = os.path.join(DATAPATH, name, '%Y-%m-%d.csv')
-    handler = ResponseHandler(path_template, variables,
-                              line_filter=line_filter)
+    variables[0]['save'] = False  # Don't save inst_time
 
     def __init__(self, port, flowcontroller='MIU'):
 
-        # Old handler for backwards compatability FIXME
-        old_path_template = os.path.join(DATAPATH, 'lgr', 'lgr_%Y_%m_%d.dat')
-        old_handler = ResponseHandler(old_path_template, LGR_UGGA.variables,
-                                      LGR_UGGA.line_filter)
-
         super().__init__(LGR_UGGA.name, serial_port(port),
                          baudrate=LGR_UGGA.baudrate,
-                         # variables=LGR_UGGA.variables,
-                         # line_filter=LGR_UGGA.line_filter)
-                         handlers=[LGR_UGGA.handler, old_handler])
+                         variables=LGR_UGGA.variables,
+                         line_filter=LGR_UGGA.line_filter)
 
         self.flow = flowcontroller
 
@@ -502,10 +501,19 @@ class LGR_UGGA(SerialDevice):
                 record = handler.format_response(response, self.logger)
                 if record is None:
                     continue
-                
-                ID = record['MIU_DESC'] if self.flow == 'MIU' else self.flow.ID
+
+                if self.flow != 'MIU':
+                    # Replace MIU_Desc
+                    if isinstance(self.flow, FlowControlSystem):
+                        # with flow controller status
+                        record['MIU_Desc'] = self.flow.status
+                    elif self.flow is None:
+                        # No flow controller, assume atmosphere
+                        record['MIU_Desc'] = 'atmosphere'
+                    else:
+                        raise ValueError('Invalid flow controller!')
+
                 data = Data(handler.path_template, {'time': timestamp,
-                                                    'ID': ID,
                                                     **record})
                 yield data
 
