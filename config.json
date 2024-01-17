@@ -31,7 +31,7 @@
   "uataq-brain": [
     {
       "class": "Magee_AE33",
-      "port": "usb-UTEK_USB__-__Serial_Cable_FT2QW3XX-if01-port0",
+      "port": "usb-UTEK_USB__-__Serial_Cable_FT2QW3XX-if01-port0"
     },
     {
       "class": "MetOne_ES642",

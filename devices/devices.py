@@ -514,6 +514,14 @@ class LGR_UGGA(SerialDevice):
                     else:
                         raise ValueError('Invalid flow controller!')
 
+                # Convert values from scientific notation to float
+                for key, value in record.items():
+                    if key not in ['time', 'ID']:
+                        try:
+                            record[key] = float(value)
+                        except ValueError:
+                            record[key] = None
+
                 data = Data(handler.path_template, {'time': timestamp,
                                                     **record})
                 yield data
