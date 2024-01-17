@@ -38,13 +38,13 @@ class FlowControlSystem:
     Attributes:
     - valve_pin (int): The raspberry GPIO board pin number for the valve control system.
     - valve (Valve): The valve control system.
-    - ID (int): The ID of the current state of the flow control system.
+    - ID (str): The ID of the current state of the flow control system.
     """
 
     def __init__(self, valve_pin):
         # Initialize Valve Control System
         self.valve = Valve(pin=valve_pin)
-        self.status = None
+        self.ID = None
 
         self._process = Process(target=self.flow)
         self._process.daemon = True
@@ -59,7 +59,7 @@ class FlowControlSystem:
         - source (str): The source of the gas.
         """
         self.valve.update(source)
-        self.status = source
+        self.ID = source
 
     def flush(self, h=0, m=0, s=90):
         """
@@ -72,7 +72,7 @@ class FlowControlSystem:
         """
 
         self.logger.debug(f'Flushing')
-        self.status = 'flush'
+        self.ID = 'flush'
         wait(h, m, s)
 
     def measure(self, source, h=0, m=0, s=0, flush=90):

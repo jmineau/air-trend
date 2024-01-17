@@ -474,9 +474,10 @@ class LGR_UGGA(SerialDevice):
                  'CH4d_ppm_sd',   'CO2d_ppm',  'CO2d_ppm_sd', 'GasP_torr',
                  'GasP_torr_sd',  'GasT_C',    'GasT_C_sd',   'AmbT_C',
                  'AmbT_C_sd',     'RD0_us',    'RD0_us_sd',   'RD1_us',
-                 'RD1_us_sd',     'Fit_Flag',  'MIU_Valve',   'MIU_Desc']
+                 'RD1_us_sd',     'Fit_Flag',  'MIU_Valve',   'ID']
     variables = [{'name': name, 'save': True} for name in variables]
     variables[0]['save'] = False  # Don't save inst_time
+    variables[-2]['save'] = False  # Don't save MIU_Valve
 
     def __init__(self, port, flowcontroller='MIU'):
 
@@ -503,13 +504,13 @@ class LGR_UGGA(SerialDevice):
                     continue
 
                 if self.flow != 'MIU':
-                    # Replace MIU_Desc
+                    # Replace ID
                     if isinstance(self.flow, FlowControlSystem):
-                        # with flow controller status
-                        record['MIU_Desc'] = self.flow.status
+                        # with flow controller ID
+                        record['ID'] = self.flow.ID
                     elif self.flow is None:
                         # No flow controller, assume atmosphere
-                        record['MIU_Desc'] = 'atmosphere'
+                        record['ID'] = 'atmosphere'
                     else:
                         raise ValueError('Invalid flow controller!')
 
