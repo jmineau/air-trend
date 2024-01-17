@@ -407,40 +407,40 @@ class GPS(SerialDevice):
     data_path = os.path.join(DATAPATH, name)
 
     # GPGGA handler
-    gpgga_path_template = os.path.join(data_path, 'gpgga_%Y-%m-%d.csv')
+    gpgga_path_template = os.path.join(data_path, '%Y-%m-%d_gpgga.csv')
     gpgga_variables = [
-        {'name': 'nmea',                  'save': False},
-        {'name': 'time_gps',              'save': True},
-        {'name': 'latitude_dm',           'save': True},
-        {'name': 'n_s',                   'save': True},
-        {'name': 'longitude_dm',          'save': True},
-        {'name': 'e_w',                   'save': True},
-        {'name': 'fix_quality',           'save': True},
-        {'name': 'n_sat',                 'save': True},
-        {'name': 'horizontal_dilution',   'save': False},
-        {'name': 'altitude_amsl',         'save': True},
-        {'name': 'altitude_amsl_unit',    'save': False},
-        {'name': 'geoidal_separation',    'save': False},
-        {'name': 'time_last_update',      'save': False},
-        {'name': 'time_last_update_unit', 'save': False},
-        {'name': 'stid_and_checksum',     'save': False}]
+        {'name': 'nmea',                   'save': False},
+        {'name': 'inst_time',              'save': True},
+        {'name': 'latitude_dm',            'save': True},
+        {'name': 'n_s',                    'save': True},
+        {'name': 'longitude_dm',           'save': True},
+        {'name': 'e_w',                    'save': True},
+        {'name': 'fix_quality',            'save': True},
+        {'name': 'n_sat',                  'save': True},
+        {'name': 'horizontal_dilution',    'save': False},
+        {'name': 'altitude_amsl',          'save': True},
+        {'name': 'altitude_amsl_unit',     'save': False},
+        {'name': 'geoidal_separation',     'save': False},
+        {'name': 'time_last_update',       'save': False},
+        {'name': 'time_last_update_unit',  'save': False},
+        {'name': 'stid_and_checksum',      'save': False}]
 
     # GPRMC handler
-    gprmc_path_template = os.path.join(data_path, 'gprmc_%Y-%m-%d.csv')
+    gprmc_path_template = os.path.join(data_path, '%Y-%m-%d_gprmc.csv')
     gprmc_variables = [
-        {'name': 'nmea',         'save': False},
-        {'name': 'time_gps',     'save': True},
-        {'name': 'status',       'save': True},
-        {'name': 'latitude_dm',  'save': True},
-        {'name': 'n_s',         'save': True},
-        {'name': 'longitude_dm', 'save': True},
-        {'name': 'e_w',          'save': True},
-        {'name': 'speed_kt',     'save': True},
-        {'name': 'true_course',  'save': True},
-        {'name': 'date_gps',     'save': True},
-        {'name': 'variation',    'save': False},
-        {'name': 'mode',         'save': False},
-        {'name': 'checksum',     'save': False}]
+        {'name': 'nmea',          'save': False},
+        {'name': 'inst_time',     'save': True},
+        {'name': 'status',        'save': True},
+        {'name': 'latitude_dm',   'save': True},
+        {'name': 'n_s',           'save': True},
+        {'name': 'longitude_dm',  'save': True},
+        {'name': 'e_w',           'save': True},
+        {'name': 'speed_kt',      'save': True},
+        {'name': 'true_course',   'save': True},
+        {'name': 'inst_date',     'save': True},
+        {'name': 'variation',     'save': False},
+        {'name': 'mode',          'save': False},
+        {'name': 'checksum',      'save': False}]
 
     # Create handlers
     GPGGA = ResponseHandler(gpgga_path_template, gpgga_variables,
