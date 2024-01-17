@@ -2,13 +2,12 @@
   "trx01": [
     {
       "class": "GPS",
-      "port": "usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0",
-      "is_active": false
+      "port": "usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0"
     },
     {
       "class": "LGR_UGGA",
       "port": "usb-FTDI_FT232R_USB_UART_AK070IGS-if00-port0",
-      "flow_controller": 16
+      "flowcontroller": null
     }
   ],
   "trx02": [
@@ -25,14 +24,14 @@
     {
       "class": "LGR_UGGA",
       "port": "usb-Prolific_Technology_Inc._USB-Serial_Controller_CREAb119D15-if00-port0",
-      "flow_controller": "MIU"
+      "flow_controller": "MIU",
+      "is_active": false
     }
   ],
   "uataq-brain": [
     {
       "class": "Magee_AE33",
       "port": "usb-UTEK_USB__-__Serial_Cable_FT2QW3XX-if01-port0",
-      "is_active": false
     },
     {
       "class": "MetOne_ES642",
