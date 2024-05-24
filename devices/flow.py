@@ -2,21 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from multiprocessing import Process
+from multiprocessing import Process, Array
 import RPi.GPIO as GPIO
 import time
 
 from valve import Valve
 
-ID_PATH = '/home/pi/.valve.id'
 
-IDs = {
-    'atmosphere': 1,
-    'reference': 2
-}
+# Sources of gas for the flow control system
+sources = [
+    'atmosphere',
+    'reference',
+    'flush'
+]
 
-
-import time
 
 def wait(h=0, m=0, s=1):
     """
@@ -33,33 +32,37 @@ def wait(h=0, m=0, s=1):
 
 class FlowControlSystem:
     """
-    A class representing a flow control system that switches between atmosphere and reference gas.
+    A class representing a flow control system that switches between different gas sources.
 
     Attributes:
     - valve_pin (int): The raspberry GPIO board pin number for the valve control system.
     - valve (Valve): The valve control system.
-    - ID (str): The ID of the current state of the flow control system.
+    - source (str): The source of the gas flow.
     """
 
-    def __init__(self, valve_pin):
+    def __init__(self, valve_pin=None):
         # Initialize Valve Control System
         self.valve = Valve(pin=valve_pin)
-        self.ID = None
+        self._source = Array('c', b' ' * max(len(s) for s in sources))
 
         self._process = Process(target=self.flow)
         self._process.daemon = True
         
         self.logger = logging.getLogger(__name__)
 
-    def update(self, source):
+    @property
+    def source(self):
         """
-        Updates the valve control system with the given source.
+        Get the source of the gas flow.
+        """
+        return self._source.value.decode('utf-8').strip()
 
-        Args:
-        - source (str): The source of the gas.
+    @source.setter
+    def source(self, source):
         """
-        self.valve.update(source)
-        self.ID = source
+        Set the source of the gas flow.
+        """
+        self._source.value = source.encode('utf-8')
 
     def flush(self, h=0, m=0, s=90):
         """
@@ -71,8 +74,8 @@ class FlowControlSystem:
         - s (int): The seconds to flush the valve control system (default 90).
         """
 
-        self.logger.debug(f'Flushing')
-        self.ID = 'flush'
+        self.logger.debug(f'Flushing...')
+        self.source = 'flush'
         wait(h, m, s)
 
     def measure(self, source, h=0, m=0, s=0, flush=90):
@@ -89,11 +92,15 @@ class FlowControlSystem:
         if (h + m + s) == 0:
             raise ValueError('Measurement time cannot be 0!')
 
+        # Update valve to source
+        self.valve.update(source)
+
         # Flush for 90 seconds before measuring
         self.flush(s=flush)
 
-        self.logger.debug(f'Measuring {source.capitalize()}')
-        self.update(source)
+        # Measure source
+        self.logger.debug(f'Measuring {source.capitalize()}...')
+        self.source = source
         wait(h, m, s)
 
     def flow(self):
@@ -125,7 +132,8 @@ class FlowControlSystem:
         Cleans up the flow control system by updating the valve to atmosphere and cleaning up the GPIO pins.
         """
         self.logger.debug('Cleaning up...')
-        self.update('atmosphere')  # End with atmospheric valve
+        self.source = 'atmosphere'
+        self.valve.update('atmosphere')  # End with atmospheric valve
         GPIO.cleanup()  # cleanup pi pins
 
 

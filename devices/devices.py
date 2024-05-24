@@ -469,7 +469,7 @@ class LGR_UGGA(SerialDevice):
     baudrate = 115200
     line_filter = '/'  # match with forward slash in inst_time
 
-    variables = ['inst_time', 'CH4_ppm',   'CH4_ppm_sd',  'H2O_ppm',
+    variables = ['inst_time',     'CH4_ppm',   'CH4_ppm_sd',  'H2O_ppm',
                  'H2O_ppm_sd',    'CO2_ppm',   'CO2_ppm_sd',  'CH4d_ppm',
                  'CH4d_ppm_sd',   'CO2d_ppm',  'CO2d_ppm_sd', 'GasP_torr',
                  'GasP_torr_sd',  'GasT_C',    'GasT_C_sd',   'AmbT_C',
@@ -479,14 +479,14 @@ class LGR_UGGA(SerialDevice):
     variables[0]['save'] = False  # Don't save inst_time
     variables[-2]['save'] = False  # Don't save MIU_Valve
 
-    def __init__(self, port, flowcontroller='MIU'):
+    def __init__(self, port, flow_controller='MIU'):
 
         super().__init__(LGR_UGGA.name, serial_port(port),
                          baudrate=LGR_UGGA.baudrate,
                          variables=LGR_UGGA.variables,
                          line_filter=LGR_UGGA.line_filter)
 
-        self.flow = flowcontroller
+        self.flow = flow_controller
 
     def get_data(self) -> Iterator[Data]:
         while True:
@@ -506,8 +506,8 @@ class LGR_UGGA(SerialDevice):
                 if self.flow != 'MIU':
                     # Replace ID
                     if isinstance(self.flow, FlowControlSystem):
-                        # with flow controller ID
-                        record['ID'] = self.flow.ID
+                        # with flow controller source
+                        record['ID'] = self.flow.source
                     elif self.flow is None:
                         # No flow controller, assume atmosphere
                         record['ID'] = 'atmosphere'

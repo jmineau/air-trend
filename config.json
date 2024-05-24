@@ -7,7 +7,7 @@
     {
       "class": "LGR_UGGA",
       "port": "usb-FTDI_FT232R_USB_UART_AK070IGS-if00-port0",
-      "flowcontroller": null
+      "flow_controller": 16
     }
   ],
   "trx02": [

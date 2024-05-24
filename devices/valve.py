@@ -10,15 +10,11 @@ Usage:
 import argparse
 import logging
 import os
-
 import RPi.GPIO as GPIO
 
 
 VALVEPIN = int(os.getenv('VALVEPIN', 16))  # default pi pin that controls valve
 
-
-import logging
-import RPi.GPIO as GPIO
 
 class Valve:
     """
@@ -39,7 +35,7 @@ class Valve:
         self.logger = logging.getLogger('flow')
 
         # Setup R-Pi board
-        self.logger.info('Activating valve control system...')
+        self.logger.info('Initializing valve...')
         GPIO.setmode(GPIO.BOARD)  # Set GPIO to use BOARD mode
 
         # Set GPIO to be a transmitting signal with inital state

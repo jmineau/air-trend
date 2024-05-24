@@ -102,6 +102,7 @@ def main():
 
         # Initialize flow controller if necessary
         flow_controller = device_config.get('flow_controller', False)
+
         if flow_controller:
             if isinstance(flow_controller, int):
                 # Initialize flow controller using GPIO board pin
