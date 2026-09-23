@@ -310,10 +310,26 @@ time,pm25_mgm3,flow_lpm,t_c,rh_pct,pres_hpa,status,checksum
 ```
 
 
-Add DS3231 module to board
-Check that the date has been correctly set by ntp servers with date
-Simply add dtoverlay=i2c-rtc,ds3231 to config.txt
-as of Raspberry Pi OS Bookworm, this was located at /boot/firmware/config.txt
+## Hardware clock (DS3231 RTC)
 
-Reboot pi
-Check that the hardware clock has been correctly set with sudo hwclock -r
+The Pi has no battery-backed clock, so without network time it boots with the
+wrong time. A DS3231 real-time clock module keeps time across offline reboots.
+
+1. **Wire it up.** VCC → 3.3 V (pin 1), SDA → GPIO2 (pin 3), SCL → GPIO3
+   (pin 5), GND → pin 6. Most DS3231 Pi boards plug directly onto pins 1–9.
+2. **Enable I²C:** `sudo raspi-config` → Interface Options → I2C.
+3. **Check the Pi sees it:** `sudo i2cdetect -y 1` should show `68`
+   (the DS3231's address).
+4. **Add the overlay** to the boot config:
+   `dtoverlay=i2c-rtc,ds3231`
+   (Raspberry Pi OS Bookworm: `/boot/firmware/config.txt`; older releases:
+   `/boot/config.txt`). Reboot.
+5. **Confirm the driver loaded:** `sudo i2cdetect -y 1` should now show `UU`
+   at `0x68` (the kernel driver has claimed the chip).
+6. **Write the time to the clock.** First make sure the system time is correct
+   from the network (`date`, or `timedatectl` → `System clock synchronized:
+   yes`), then: `sudo hwclock -w`
+7. **Reboot and read it back:** `sudo hwclock -r` should match `date`.
+
+If the time is wrong after an offline reboot, check whether `fake-hwclock` is
+installed — it restores the last shutdown time and can override the RTC.
