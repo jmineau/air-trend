@@ -47,7 +47,7 @@ class FlowControlSystem:
 
         self._process = Process(target=self.flow)
         self._process.daemon = True
-        
+
         self.logger = logging.getLogger(__name__)
 
     @property
@@ -73,7 +73,6 @@ class FlowControlSystem:
         - m (int): The minutes to flush the valve control system (default 0).
         - s (int): The seconds to flush the valve control system (default 90).
         """
-
         self.logger.debug(f'Flushing...')
         self.source = 'flush'
         wait(h, m, s)
@@ -107,8 +106,6 @@ class FlowControlSystem:
         """
         Starts the flow control system and measures atmospheric and reference tank gas.
         """
-        self.logger.info('Starting flow control system...')
-        
         try:
             while True:
                 # Measure atmosphere for 1 hour
@@ -123,8 +120,9 @@ class FlowControlSystem:
 
     def start(self):
         """
-        Starts the flow control system process.
+        Starts the flow control system as a multiprocessing process.
         """
+        self.logger.info('Starting flow control system...')
         self._process.start()
 
     def cleanup(self):

@@ -308,3 +308,12 @@ time,pm25_mgm3,flow_lpm,t_c,rh_pct,pres_hpa,status,checksum
 2020-12-01T00:00:09.277855,000.015,2.0,+05.4,017,0857.7,00,*01551
 2020-12-01T00:00:10.270850,000.015,2.0,+05.4,017,0857.7,00,*01551
 ```
+
+
+Add DS3231 module to board
+Check that the date has been correctly set by ntp servers with date
+Simply add dtoverlay=i2c-rtc,ds3231 to config.txt
+as of Raspberry Pi OS Bookworm, this was located at /boot/firmware/config.txt
+
+Reboot pi
+Check that the hardware clock has been correctly set with sudo hwclock -r
